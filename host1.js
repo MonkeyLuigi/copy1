@@ -278,4 +278,3 @@ function renderPlayerList(players) {
 // Make `startNewGame` and `resumeGame` accessible in the global scope for HTML onclick usage
 window.startNewGame = startNewGame;
 window.resumeGame = resumeGame;
-window.killPlayer = killPlayer;
