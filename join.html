@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senior Assassin - Join</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1.2rem;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Join a Game</h1>
+    <input type="text" id="join-game-code" placeholder="Enter Game Code" />
+    <input type="text" id="player-name" placeholder="Enter Your Name" />
+    <input type="text" id="contact-info" placeholder="Enter Contact Info" />
+    <input type="file" id="profile-picture" accept="image/*" />
+    <button onclick="joinGame()">Join Game</button>
+
+    <div id="join-status" style="margin-top: 10px; color: red;"></div>
+
+    <script type="module" src="joinscript1.js"></script>
+</body>
+</html>
