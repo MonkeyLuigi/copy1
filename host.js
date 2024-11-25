@@ -20,9 +20,11 @@ let players = [];
 // Function to start a new game
 async function startNewGame() {
     const gameCode = Math.floor(Math.random() * 1000000).toString();
+    const hostPassword = Math.floor(Math.random() * 1000000).toString()
     const filePath = `${gameCode}.json`; // Each game gets its own file
     const initialData = {
         gameCode: gameCode,
+        hostPassword: hostPassword,
         players: []
     };
 
@@ -33,6 +35,7 @@ async function startNewGame() {
             repo: GITHUB_API_REPO,
             path: filePath,
             message: `Create a new game with code ${gameCode}`,
+            message: `Access the game with ${hostPassword}`,
             committer: {
                 name: 'Game Host',
                 email: 'kaden.c.clayton@gmail.com'
@@ -46,6 +49,9 @@ async function startNewGame() {
         if (response.status === 201) { // Status 201 indicates successful file creation
             document.getElementById('game-code-display').textContent = `Game Code: ${gameCode}`;
             alert("Game started! Share this code with joiners.");
+
+             document.getElementById('host-password-display').textContent = `Host Password: ${host-password-display}`;
+            alert("Save this Password so you can edit a game once players have joined!.");
         } else {
             alert("Failed to create game. Please check your GitHub settings.");
         }
@@ -58,10 +64,11 @@ async function startNewGame() {
 // Function to resume a game by game code
 async function resumeGame() {
     const gameCode = document.getElementById('resume-game-code').value.trim();
+    const hostPassword = document.getElementById('host-game-password').value.trim();
     const statusElement = document.getElementById('resume-status'); // Status messages
 
-    if (!gameCode) {
-        statusElement.textContent = "Please enter a valid game code.";
+    if (!gameCode || !hostPassword) {
+        statusElement.textContent = "Please enter a valid game code and/or password.";
         statusElement.style.color = "red";
         return;
     }
@@ -79,7 +86,7 @@ async function resumeGame() {
             }
         });
 
-        if (response.status === 200) {
+        if (response.status === 200 && hostPassword === gameData.hostPassword) {
             const content = atob(response.data.content);
             const gameData = JSON.parse(content);
 
@@ -93,7 +100,7 @@ async function resumeGame() {
                 statusElement.style.color = "red";
             }
         } else {
-            statusElement.textContent = "Game not found. Check the game code.";
+            statusElement.textContent = "Game not found. Check the game code and/or password.";
             statusElement.style.color = "red";
         }
     } catch (error) {
