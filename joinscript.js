@@ -12,41 +12,7 @@ const GITHUB_API_REPO = 'senior_assassin'; // Replace with your repository name
 const octokit = new Octokit({
     auth: GITHUB_TOKEN
 });
-async function uploadImageToGitHub(imageFile, fileName) {
-    const filePath = `images/${fileName}`; // Store in the 'images/' folder
-    const base64Content = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]); // Extract base64 content
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
-    });
 
-    try {
-        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-            owner: GITHUB_API_OWNER,
-            repo: GITHUB_API_REPO,
-            path: filePath,
-            message: `Upload image: ${fileName}`,
-            committer: {
-                name: "Game Host",
-                email: "your-email@example.com"
-            },
-            content: base64Content, // Base64 encoded image content
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        });
-
-        if (response.status === 201) {
-            return `https://raw.githubusercontent.com/${GITHUB_API_OWNER}/${GITHUB_API_REPO}/main/${filePath}`;
-        } else {
-            throw new Error("Failed to upload the image.");
-        }
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        return null;
-    }
-}
 
 
 // Function for players to join a game
@@ -70,7 +36,7 @@ async function joinGame() {
         statusElement.style.color = "red";
         return;
     }
-
+        try{
         const profilePictureFile = profilePictureInput.files[0];
         const profilePictureURL = await uploadImageToGitHub(profilePictureFile, `${playerName}.jpg`);
         
@@ -80,7 +46,7 @@ async function joinGame() {
         return;
     }
 
-
+        }
 
         const filePath = `${gameCode}.json`;
 
@@ -151,7 +117,41 @@ async function joinGame() {
     }
 }
 
+async function uploadImageToGitHub(imageFile, fileName) {
+    const filePath = `images/${fileName}`; // Store in the 'images/' folder
+    const base64Content = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]); // Extract base64 content
+        reader.onerror = reject;
+        reader.readAsDataURL(imageFile);
+    });
 
+    try {
+        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            owner: GITHUB_API_OWNER,
+            repo: GITHUB_API_REPO,
+            path: filePath,
+            message: `Upload image: ${fileName}`,
+            committer: {
+                name: "Game Host",
+                email: "your-email@example.com"
+            },
+            content: base64Content, // Base64 encoded image content
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+
+        if (response.status === 201) {
+            return `https://raw.githubusercontent.com/${GITHUB_API_OWNER}/${GITHUB_API_REPO}/main/${filePath}`;
+        } else {
+            throw new Error("Failed to upload the image.");
+        }
+    } catch (error) {
+        console.error("Error uploading image:", error);
+        return null;
+    }
+}
 
 // Expose the function globally so the HTML can use it
 window.joinGame = joinGame;
