@@ -1,56 +1,35 @@
-// GitHub API Configuration
-// Import Octokit (for environments like bundlers or modern browsers)
-import { Octokit } from 'https://cdn.skypack.dev/@octokit/core';
-
-// Example script
-const GITHUB_API_URL = 'https://api.github.com/repos/monkeyluigi/senior_assassin/contents/';
-const GITHUB_TOKEN_SUFFIX = '1DyloV1tSDJW813AgexIkMVK2YMqqX155bPA';
-const GITHUB_TOKEN = "ghp_" + GITHUB_TOKEN_SUFFIX;
-const GITHUB_API_OWNER = 'monkeyluigi'; // Replace with your GitHub username
-const GITHUB_API_REPO = 'senior_assassin'; // Replace with your repository name
-
-const octokit = new Octokit({
-    auth: GITHUB_TOKEN
-});
-
-
-
-// Function for players to join a game
 async function joinGame() {
     const gameCode = document.getElementById('join-game-code').value.trim();
     const playerName = document.getElementById('player-name').value.trim();
     const contactInfo = document.getElementById('contact-info').value.trim();
     const profilePictureInput = document.getElementById('profile-picture');
-    const statusElement = document.getElementById('join-status'); // Corrected ID
+    const statusElement = document.getElementById('join-status');
 
-    // Check if game code and player name are provided
     if (!gameCode || !playerName || !contactInfo) {
         statusElement.textContent = "Please enter a valid game code, contact info, and/or your name.";
         statusElement.style.color = "red";
         return;
     }
 
-    // Check if a profile picture is uploaded
     if (!profilePictureInput.files || profilePictureInput.files.length === 0) {
         statusElement.textContent = "Please upload a profile picture to join.";
         statusElement.style.color = "red";
         return;
     }
-        try{
-        const profilePictureFile = profilePictureInput.files[0];
-        const profilePictureURL = await uploadImageToGitHub(profilePictureFile, `${playerName}.jpg`);
-        
-        if (!profilePictureURL) {
-        statusElement.textContent = "Failed to upload profile picture. Please try again.";
-        statusElement.style.color = "red";
-        return;
-    }
 
+    try {
+        const profilePictureFile = profilePictureInput.files[0];
+        const uniqueFileName = `${playerName}_${Date.now()}.jpg`; // Ensure unique file name
+        const profilePictureURL = await uploadImageToGitHub(profilePictureFile, uniqueFileName);
+
+        if (!profilePictureURL) {
+            statusElement.textContent = "Failed to upload profile picture. Please try again.";
+            statusElement.style.color = "red";
+            return;
         }
 
         const filePath = `${gameCode}.json`;
 
-        // Fetch the current game data
         const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: GITHUB_API_OWNER,
             repo: GITHUB_API_REPO,
@@ -64,7 +43,6 @@ async function joinGame() {
             const content = atob(response.data.content);
             const gameData = JSON.parse(content);
 
-            // Check if the player name is already in use
             const nameExists = gameData.players.some(player => player.name.toLowerCase() === playerName.toLowerCase());
             if (nameExists) {
                 statusElement.textContent = "This name is already in use. Please choose a different name.";
@@ -72,7 +50,6 @@ async function joinGame() {
                 return;
             }
 
-            // Add the new player to the game data
             const newPlayer = {
                 name: playerName,
                 contact: contactInfo,
@@ -81,8 +58,7 @@ async function joinGame() {
             };
             gameData.players.push(newPlayer);
 
-            // Upload updated game data to GitHub
-            const sha = response.data.sha; // Get the sha of the existing file
+            const sha = response.data.sha;
             const updateResponse = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
                 owner: GITHUB_API_OWNER,
                 repo: GITHUB_API_REPO,
@@ -93,7 +69,7 @@ async function joinGame() {
                     email: 'your-email@example.com'
                 },
                 content: btoa(JSON.stringify(gameData)),
-                sha: sha, // Include the sha for updates
+                sha: sha,
                 headers: {
                     'X-GitHub-Api-Version': '2022-11-28'
                 }
@@ -116,42 +92,3 @@ async function joinGame() {
         statusElement.style.color = "red";
     }
 }
-
-async function uploadImageToGitHub(imageFile, fileName) {
-    const filePath = `images/${fileName}`; // Store in the 'images/' folder
-    const base64Content = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]); // Extract base64 content
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
-    });
-
-    try {
-        const response = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-            owner: GITHUB_API_OWNER,
-            repo: GITHUB_API_REPO,
-            path: filePath,
-            message: `Upload image: ${fileName}`,
-            committer: {
-                name: "Game Host",
-                email: "your-email@example.com"
-            },
-            content: base64Content, // Base64 encoded image content
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        });
-
-        if (response.status === 201) {
-            return `https://raw.githubusercontent.com/${GITHUB_API_OWNER}/${GITHUB_API_REPO}/main/${filePath}`;
-        } else {
-            throw new Error("Failed to upload the image.");
-        }
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        return null;
-    }
-}
-
-// Expose the function globally so the HTML can use it
-window.joinGame = joinGame;
