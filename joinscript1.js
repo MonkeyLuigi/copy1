@@ -22,8 +22,8 @@ async function joinGame() {
     const statusElement = document.getElementById('join-status'); // Corrected ID
 
     // Check if game code and player name are provided
-    if (!gameCode || !playerName) {
-        statusElement.textContent = "Please enter both a valid game code and your name.";
+    if (!gameCode || !playerName || !contactInfo) {
+        statusElement.textContent = "Please enter a valid game code, contact info, and/or your name.";
         statusElement.style.color = "red";
         return;
     }
@@ -72,6 +72,7 @@ async function joinGame() {
             // Add the new player to the game data
             const newPlayer = {
                 name: playerName,
+                contact: contactInfo,
                 status: "alive",
                 profilePicture: profilePicture
             };
