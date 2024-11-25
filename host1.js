@@ -224,66 +224,7 @@ async function killPlayer(index) {
     }
 }
 
-async function killPlayer(index) {
-    const gameCode = document.getElementById('resume-game-code').value.trim();
 
-    if (!gameCode) {
-        alert("No game code found. Please resume a game first.");
-        return;
-    }
-
-    const filePath = `${gameCode}.json`;
-
-    try {
-        // Fetch the current game data
-        const response = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: GITHUB_API_OWNER,
-            repo: GITHUB_API_REPO,
-            path: filePath,
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        });
-
-        if (response.status === 200) {
-            const content = atob(response.data.content);
-            const gameData = JSON.parse(content);
-
-            // Mark the player as dead
-            gameData.players[index].status = "dead";
-
-            // Update the game data on GitHub
-            const sha = response.data.sha; // Required for updates
-            const updateResponse = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-                owner: GITHUB_API_OWNER,
-                repo: GITHUB_API_REPO,
-                path: filePath,
-                message: `Mark ${gameData.players[index].name} as dead`,
-                committer: {
-                    name: 'Game Host',
-                    email: 'your-email@example.com'
-                },
-                content: btoa(JSON.stringify(gameData)),
-                sha: sha,
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-
-            if (updateResponse.status === 200 || updateResponse.status === 201) {
-                alert(`${gameData.players[index].name} has been marked as dead.`);
-                renderPlayerList(gameData.players); // Refresh the list
-            } else {
-                alert("Failed to update the game data. Try again.");
-            }
-        } else {
-            alert("Failed to fetch the game data. Check the game code.");
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert("An error occurred while updating the player's status.");
-    }
-}
 
 
 
