@@ -236,7 +236,7 @@ function renderPlayerList(players) {
     playerListContainer.innerHTML = '';
 
     // Loop through players and create HTML for each
-    players.forEach((player,index) => {
+    players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
         playerDiv.className = 'player';
 
@@ -247,10 +247,10 @@ function renderPlayerList(players) {
         playerStatus.textContent = `Status: ${player.status}`;
 
         const contactInfo = document.createElement('p');
-        contactInfo.textContent = `Contact: ${player.contact}`;
+        contactInfo.textContent = `Contact: ${player.contact || "N/A"}`; // Fallback for missing contact info
 
         const playerImage = document.createElement('img');
-        playerImage.src = player.profilePicture; // Base64 or URL
+        playerImage.src = player.profilePicture || "placeholder.png"; // Fallback for missing profile picture
         playerImage.alt = `${player.name}'s profile picture`;
         playerImage.style.width = '100px'; // Adjust size as needed
 
@@ -258,8 +258,7 @@ function renderPlayerList(players) {
         removeButton.textContent = 'Remove';
         removeButton.className = 'remove-button';
         removeButton.onclick = () => removePlayer(index); // Pass the player's index
-        
-        // Kill Button
+
         const killButton = document.createElement('button');
         killButton.textContent = 'Kill';
         killButton.className = 'kill-button';
@@ -272,8 +271,12 @@ function renderPlayerList(players) {
         playerDiv.appendChild(contactInfo);
         playerDiv.appendChild(removeButton);
         playerDiv.appendChild(killButton);
+
+        // Append playerDiv to the container
+        playerListContainer.appendChild(playerDiv);
     });
 }
+
 
 // Make `startNewGame` and `resumeGame` accessible in the global scope for HTML onclick usage
 window.startNewGame = startNewGame;
