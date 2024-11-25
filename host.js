@@ -184,7 +184,7 @@ function renderPlayerList(players) {
         playerStatus.textContent = `Status: ${player.status}`;
 
         const contactInfo = document.createElement('p');
-        contactInfo.textContent = `Contact: ${player.contactInfo}`;
+        contactInfo.textContent = `Contact: ${player.contact}`;
 
         const playerImage = document.createElement('img');
         playerImage.src = player.profilePicture; // Base64 or URL
